@@ -4,12 +4,18 @@ import streamlit as st
 from dotenv import load_dotenv, find_dotenv
 import PyPDF2
 
-# Carrega as variáveis do .env
-_ = load_dotenv(find_dotenv())
-client = openai.Client()
-
+# Configuração inicial do Streamlit
 st.set_page_config(page_title="Analisador de PDF com IA", layout="wide")
 st.title("📄🔍 Analisador de PDF com IA")
+
+# Inicialização do cliente OpenAI com tratamento seguro de credenciais
+try:
+    client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])  # Usando secrets do Streamlit
+except (KeyError, AttributeError) as e:
+    st.error("""🚨 Erro de configuração da API da OpenAI. Verifique:
+            1. Se a chave API foi adicionada nas Secrets do Streamlit Cloud
+            2. Se o nome da secret é exatamente 'OPENAI_API_KEY'""")
+    st.stop()
 
 # Função para extrair texto do PDF
 def extrai_texto_pdf(uploaded_file):
@@ -49,16 +55,19 @@ if uploaded_file is not None:
         st.session_state.mensagens.append({"role": "user", "content": pergunta})
 
         with st.spinner("Gerando resposta..."):
-            resposta = client.chat.completions.create(
-                messages=st.session_state.mensagens,
-                model="gpt-4o",
-                max_tokens=1000,
-                temperature=0
-            )
-            resposta_ia = resposta.choices[0].message
-            st.session_state.mensagens.append(resposta_ia.model_dump(exclude_none=True))
-            st.success("✅ Resposta gerada:")
-            st.write(resposta_ia.content)
+            try:
+                resposta = client.chat.completions.create(
+                    messages=st.session_state.mensagens,
+                    model="gpt-4o",
+                    max_tokens=1000,
+                    temperature=0
+                )
+                resposta_ia = resposta.choices[0].message
+                st.session_state.mensagens.append(resposta_ia.model_dump(exclude_none=True))
+                st.success("✅ Resposta gerada:")
+                st.write(resposta_ia.content)
+            except Exception as e:
+                st.error(f"Erro ao gerar resposta: {str(e)}")
 
     # Mostrar histórico da conversa (opcional)
     with st.expander("🕓 Histórico da conversa"):
@@ -69,4 +78,3 @@ if uploaded_file is not None:
                 st.markdown(f"**Assistente:** {msg['content']}")
 else:
     st.info("Envie um PDF para começar.")
-    
