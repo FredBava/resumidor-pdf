@@ -1,4 +1,4 @@
-# ==== Ambiente Python ====
+
 __pycache__/
 *.pyc
 *.pyo
@@ -6,7 +6,7 @@ __pycache__/
 .venv/
 venv/
 
-# ==== Arquivos de Ambiente ====
+
 .env
 .ENV
 .env.*
@@ -14,15 +14,15 @@ venv/
 .env/
 .env.local
 
-# ==== Configurações do Streamlit ====
-.streamlit/secrets.toml  # 🔥 Importantíssimo!
 
-# ==== IDE/Editores ====
+.streamlit/secrets.toml
+
+
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# ==== Sistema ====
+
 .DS_Store
 Thumbs.db
